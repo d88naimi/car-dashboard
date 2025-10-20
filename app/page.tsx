@@ -3,6 +3,9 @@ import useSWRMutation from "swr/mutation";
 import { fetcher } from "@/lib/fetcher";
 import { useState } from "react";
 import GeometricSpinner from "./components/loadingSpinner";
+import { capitalizeWords } from "./components/utils/helpers";
+import YearDropdown from "./components/yearSelect";
+import MakewDropdown from "./components/makes";
 
 interface Car {
   id: string;
@@ -21,12 +24,19 @@ interface Car {
 }
 
 export default function Home() {
+  const [year, setYear] = useState("");
   const [make, setMake] = useState("");
+  const [model, setModel] = useState("");
+  const [search, setSearch] = useState("");
 
   const { data, error, isMutating, trigger } = useSWRMutation(
     "/api/cars",
-    async (key, { arg }: { arg: string }) => {
-      return fetcher(`https://api.api-ninjas.com/v1/cars?make=${arg}`);
+    async (key, { arg }: { arg: { make: string; year: string } }) => {
+      const params = new URLSearchParams();
+      if (arg.make) params.append("make", arg.make.toLowerCase());
+      if (arg.year) params.append("year", arg.year);
+      console.log("🚀 ~ Home ~ params:", params);
+      return fetcher(`https://api.api-ninjas.com/v1/cars?${params.toString()}`);
     }
   );
 
@@ -35,9 +45,21 @@ export default function Home() {
     id: `${car.make}-${car.model}-${car.year}-${index}`,
   }));
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const vehicleMake = event.target.value;
-    setMake(vehicleMake);
+  const handleVehicleYearChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setYear(event.target.value);
+  };
+  const handleVehicleMakeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setMake(event.target.value);
+  };
+
+  const handleVehicleSearchChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setSearch(event.target.value);
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -56,21 +78,25 @@ export default function Home() {
         className="bg-white rounded-lg shadow-md p-6"
       >
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
+          <div className="flex-1 ">
+            <div className="pb-4">
+              <YearDropdown value={year} onChange={handleVehicleYearChange} />
+            </div>
+            <MakewDropdown value={make} onChange={handleVehicleMakeChange} />
+            <input
+              id="my-input"
+              type="text"
+              value={make}
+              onChange={handleVehicleSearchChange}
+              placeholder="e.g., Toyota, Honda, Ford..."
+              className="w-full px-4 py-3 border text-black border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+            />
             <label
               htmlFor="my-input"
               className="block text-black text-sm font-medium text-slate-700 mb-2"
             >
               Search for a car make
             </label>
-            <input
-              id="my-input"
-              type="text"
-              value={make}
-              onChange={handleChange}
-              placeholder="e.g., Toyota, Honda, Ford..."
-              className="w-full px-4 py-3 border text-black border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-            />
           </div>
           <div className="flex items-end">
             <button
@@ -115,13 +141,14 @@ export default function Home() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-bold text-slate-900 mb-4">Results</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {carsWithId.map((car) => (
+            {carsWithId.map((car: Car) => (
               <div
                 key={car.id}
                 className="border border-slate-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
               >
                 <h3 className="font-bold text-lg text-slate-900 mb-3">
-                  {car.make} {car.model} ({car.year})
+                  {capitalizeWords(car.make)} {capitalizeWords(car.model)} (
+                  {car.year})
                 </h3>
                 <ul className="space-y-2 text-sm text-slate-600">
                   <li className="flex justify-between">
@@ -135,6 +162,14 @@ export default function Home() {
                   <li className="flex justify-between">
                     <span className="font-medium">Cylinders:</span>
                     <span>{car.cylinders}</span>
+                  </li>
+                  <li className="flex justify-between">
+                    <span className="font-medium">Displacement:</span>
+                    <span>{car.displacement}L</span>
+                  </li>
+                  <li className="flex justify-between">
+                    <span className="font-medium">Transmission:</span>
+                    <span>{car.transmission}L</span>
                   </li>
                   <li className="flex justify-between">
                     <span className="font-medium">Displacement:</span>
