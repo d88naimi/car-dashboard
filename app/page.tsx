@@ -5,7 +5,7 @@ import { useState } from "react";
 import GeometricSpinner from "./components/loadingSpinner";
 import { capitalizeWords } from "./components/utils/helpers";
 import YearDropdown from "./components/yearSelect";
-import MakewDropdown from "./components/makes";
+import MakeDropdown from "./components/makes";
 
 interface Car {
   id: string;
@@ -32,11 +32,11 @@ export default function Home() {
   const { data, error, isMutating, trigger } = useSWRMutation(
     "/api/cars",
     async (key, { arg }: { arg: { make: string; year: string } }) => {
-      const params = new URLSearchParams();
-      if (arg.make) params.append("make", arg.make.toLowerCase());
-      if (arg.year) params.append("year", arg.year);
-      console.log("🚀 ~ Home ~ params:", params);
-      return fetcher(`https://api.api-ninjas.com/v1/cars?${params.toString()}`);
+      // const params = new URLSearchParams();
+      // if (arg.make) params.append("make", arg.make.toLowerCase());
+      // if (arg.year) params.append("year", arg.year);
+
+      return fetcher(`https://api.api-ninjas.com/v1/cars?model=${make}`);
     }
   );
 
@@ -78,25 +78,40 @@ export default function Home() {
         className="bg-white rounded-lg shadow-md p-6"
       >
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 ">
+          <div className="flex-1">
             <div className="pb-4">
+              {/* Year Dropdown */}
+              <label className="block text-slate-700 text-sm font-medium mb-2">
+                Year
+              </label>
               <YearDropdown value={year} onChange={handleVehicleYearChange} />
             </div>
-            <MakewDropdown value={make} onChange={handleVehicleMakeChange} />
-            <input
-              id="my-input"
-              type="text"
-              value={make}
-              onChange={handleVehicleSearchChange}
-              placeholder="e.g., Toyota, Honda, Ford..."
-              className="w-full px-4 py-3 border text-black border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-            />
-            <label
-              htmlFor="my-input"
-              className="block text-black text-sm font-medium text-slate-700 mb-2"
-            >
-              Search for a car make
-            </label>
+
+            {/* Make Dropdown */}
+            <div className="pb-4">
+              <label className="block text-slate-700 text-sm font-medium mb-2">
+                Car Make
+              </label>
+              <MakeDropdown value={make} onChange={handleVehicleMakeChange} />
+            </div>
+
+            {/* Search Input */}
+            <div>
+              <label
+                htmlFor="my-input"
+                className="block text-slate-700 text-sm font-medium mb-2"
+              >
+                Or search by model
+              </label>
+              <input
+                id="my-input"
+                type="text"
+                value={search}
+                onChange={handleVehicleSearchChange}
+                placeholder="e.g., Camry, Accord, Mustang..."
+                className="w-full px-4 py-3 border border-slate-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+              />
+            </div>
           </div>
           <div className="flex items-end">
             <button
@@ -104,33 +119,7 @@ export default function Home() {
               disabled={isMutating}
               className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isMutating ? (
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Searching...
-                </span>
-              ) : (
-                "Search"
-              )}
+              {isMutating ? <GeometricSpinner /> : "Search"}
             </button>
           </div>
         </div>
