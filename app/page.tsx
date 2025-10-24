@@ -109,7 +109,7 @@ export default function Home() {
                 value={search}
                 onChange={handleVehicleSearchChange}
                 placeholder="e.g., Camry, Accord, Mustang..."
-                className="w-full px-4 py-3 border border-slate-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                className="w-full px-4 py-3 border border-slate-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow text-black"
               />
             </div>
           </div>
