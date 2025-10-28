@@ -36,3 +36,26 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Zustand notes
+
+"use client";
+
+import { useVehicleStore } from "../store/vehicleStore";
+import { capitalizeWords } from "./utils/helpers";
+import { shallow } from "zustand/shallow";
+
+export default function VehicleResults() {
+// If importing helper state via destructuring method you need to copy object via shallow method
+const { searchResults, isLoading, error, year } = useVehicleStore(
+(state) => ({
+searchResults: state.searchResults,
+isLoading: state.isLoading,
+error: state.error,
+year: state.year,
+}),
+shallow
+);
+
+// ... rest of component
+}
